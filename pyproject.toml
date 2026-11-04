@@ -5,7 +5,7 @@ description = "Download anime from `anikoto.tv` / `anikoto.bz` / `anikoto.net` /
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
-authors = [{name = "testingbetaversion", email = ""}]
+authors = [{name = "testingbetaversion"}]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
