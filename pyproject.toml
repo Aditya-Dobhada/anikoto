@@ -1,11 +1,11 @@
 [project]
 name = "anikoto" 
-version = "8.3.0"
+version = "8.3.1"
 description = "Download anime from `anikoto.tv` / `anikoto.bz` / `anikoto.net` / `anikoto.cz`"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
-authors = [{name = "testingbetaversion"}]
+authors = [{name = "Aditya-Dobhada"}]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
@@ -31,8 +31,8 @@ anikoto = "anikoto.anikoto:main"
 anikoto-gui = "anikoto.gui:run_gui"
 
 [project.urls]
-"Homepage" = "https://github.com/testingbetaversion/anikoto"
-"Source" = "https://github.com/testingbetaversion/anikoto"
+"Homepage" = "https://github.com/Aditya-Dobhada/anikoto"
+"Source" = "https://github.com/Aditya-Dobhada/anikoto"
 
 [build-system]
 requires = ["setuptools>=61", "wheel"]

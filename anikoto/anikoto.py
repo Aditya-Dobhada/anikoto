@@ -7,7 +7,10 @@ import argparse
 # from pydoc import html
 import sys
 from traceback import format_exc
-from langcodes import Language
+try:
+    from langcodes import Language
+except ImportError:
+    Language = None
 import logging
 import os
 import datetime
@@ -29,8 +32,12 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 
 import hashlib
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import unpad
+try:
+    from Crypto.Cipher import AES
+    from Crypto.Util.Padding import unpad
+    HAS_PYCRYPTODOME = True
+except ImportError:
+    HAS_PYCRYPTODOME = False
 
 class CustomFormatter(logging.Formatter):
     COLORS = {
@@ -280,8 +287,20 @@ def decrypt_source(encoded, key, iv):
     key_bytes = key.encode("utf-8")[:32].ljust(32, b"\0")
     iv_bytes = iv.encode("utf-8")[:16].ljust(16, b"\0")
     encrypted = base64.urlsafe_b64decode(encoded + "=" * (-len(encoded) % 4))
-    cipher = AES.new(key_bytes, AES.MODE_CBC, iv_bytes)
-    return json.loads(unpad(cipher.decrypt(encrypted), AES.block_size).decode("utf-8"))
+    if HAS_PYCRYPTODOME:
+        try:
+            cipher = AES.new(key_bytes, AES.MODE_CBC, iv_bytes)
+            return json.loads(unpad(cipher.decrypt(encrypted), AES.block_size).decode("utf-8"))
+        except Exception:
+            pass
+
+    # Standard cryptography fallback
+    cipher = Cipher(algorithms.AES(key_bytes), modes.CBC(iv_bytes), backend=default_backend())
+    decryptor = cipher.decryptor()
+    decrypted = decryptor.update(encrypted) + decryptor.finalize()
+    unpadder = padding.PKCS7(128).unpadder()
+    unpadded = unpadder.update(decrypted) + unpadder.finalize()
+    return json.loads(unpadded.decode("utf-8"))
 
 def download(url, referer, path, anime, title, number,args):
     anime = clean_name(anime)
@@ -454,9 +473,13 @@ def subtitles(response, session, args, anime, number, title):
                     if track.get('file'):
                         logging.info(f"Track URL: {track.get('file')}")
                         language_name = track_label.split()[0]
-                        try:
-                            code = Language.find(language_name).language
-                        except Exception:
+                        code = "en"
+                        if Language is not None:
+                            try:
+                                code = Language.find(language_name).language
+                            except Exception:
+                                code = language_name.lower()[:2]
+                        else:
                             code = language_name.lower()[:2]
                         if not os.path.exists(f"{args.path}/{anime}/{anime} E{number} {title}.{code}.vtt"):
                             logging.info(f"Downloading subtitles for E{number} {title} {track_label}")
@@ -518,15 +541,22 @@ def main():
     args = parser.parse_args()
     if args.gui or not args.url:
         try:
-            from anikoto.gui import run_gui
-            run_gui()
-            return
+            from anikoto.gui import HAS_CUSTOMTKINTER, run_gui
+            if HAS_CUSTOMTKINTER:
+                run_gui()
+                return
+            elif args.gui:
+                run_gui()
+                return
         except Exception as e:
             if args.gui:
                 logging.error(f"Failed to launch GUI: {e}")
                 sys.exit(1)
-            parser.print_help()
-            sys.exit(1)
+
+        parser.print_help()
+        print("\nTip: To run the desktop app without Python or terminal setup, download from:")
+        print("     https://github.com/Aditya-Dobhada/anikoto/releases/latest")
+        sys.exit(0)
 
     if args.debug:
         logging.info("Selected Args"+str(args))

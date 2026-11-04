@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='anikoto',
-    version='8.3.0',
+    version='8.3.1',
     packages=find_packages(),
     install_requires=[
         'requests',
@@ -23,13 +23,13 @@ setup(
             'anikoto-gui=anikoto.gui:run_gui',
         ],
     },
-    author='testingbetaversion',
+    author='Aditya-Dobhada',
     description='Download anime from `anikoto.tv` / `anikoto.bz` / `anikoto.net` / `anikoto.cz`',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/testingbetaversion/anikoto',
+    url='https://github.com/Aditya-Dobhada/anikoto',
     classifiers=[
         'Programming Language :: Python :: 3',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
 )

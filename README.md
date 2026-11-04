@@ -1,100 +1,85 @@
-# 🌀 Anikoto Anime Downloader
+# Anikoto
 
-A fast, clean anime downloader and desktop app for `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `anikoto.cz`.
-
-Includes both a **modern graphical user interface (GUI)** for desktop users and a **full-featured CLI** for scripts and automation.
+Fast anime downloader and desktop app for `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `anikoto.cz`.
 
 ---
 
-## Highlights
+## Windows Quick Start (No Python Required)
 
-- **Desktop GUI:** Sleek dark-mode interface with URL auto-fetch, episode range pickers, progress bars, and one-click folder opening.
-- **Portable Windows Executable:** Zero installation required on Windows—download and run directly.
-- **Multiple Audio Tracks:** Seamless support for **Sub** (original audio + subtitles) and **Dub** (English).
-- **Flexible Episode Selection:** Download individual episodes (`--range 14-14`), full seasons (`--range 1-24`), arbitrary lists (`-e 1,3,7`), or entire series.
-- **Specific Server Selection:** Target generic providers (`vidstream`, `megaplay`, `hd`, `kiwi`, `vidcloud`, `vidplay`) or exact server channels (`vidstream-1`, `hd-1`, `vidstream-2`).
-- **Subtitle Handling:** Automatically fetches WebVTT captions with matching filenames for instant playback in media players (IINA, VLC, MPV).
-- **Quality Selector:** Choose stream bitrates from `360p` up to `2160p` (`1080p` default).
-- **Fast Multithreaded Downloads:** Powered by `yt-dlp` with fragment concurrency.
+1. Go to **[Latest Releases](https://github.com/Aditya-Dobhada/anikoto/releases/latest)**.
+2. Download **`anikoto-windows.zip`**.
+3. Extract the zip file anywhere on your computer.
+4. Double-click **`Anikoto.exe`** to open the app.
+
+Paste the anime URL, choose Sub or Dub, set your episode range, and click **Start Download**.
 
 ---
 
-## Desktop App (GUI)
+## macOS and Linux Quick Start
 
-Anikoto features a standalone desktop interface designed for easy, click-and-run usage without needing to type terminal commands.
-
-### Windows (Zero Install)
-
-1. Download `anikoto-windows.zip` from the latest [GitHub Releases](https://github.com/Aditya-Dobhada/anikoto/releases).
-2. Extract the folder.
-3. Double-click **`Anikoto-GUI.exe`**.
-
-### Run via `uvx` (macOS, Windows, Linux)
-
-If you have `uv` installed, launch the GUI instantly without cloning:
-
-```bash
-uvx --from git+https://github.com/Aditya-Dobhada/anikoto.git anikoto-gui
-```
-
-### Run from Source / Terminal
-
-If installed locally, run:
-
-```bash
-anikoto-gui
-```
-
-*(Running `anikoto` without any arguments also automatically opens the GUI).*
-
----
-
-## Quick Windows Setup (Non-Technical Guide)
-
-If you are setting up a Windows PC and prefer a one-line installer:
-
-1. Press the **Windows Key**, type **`powershell`**, and hit **Enter**.
-2. Paste this command and press **Enter** (installs `uv` automatically):
-   ```powershell
-   irm https://astral.sh/uv/install.ps1 | iex
-   ```
-3. Restart PowerShell.
-4. Launch the desktop app:
-   ```powershell
-   uvx --from git+https://github.com/Aditya-Dobhada/anikoto.git anikoto-gui
-   ```
-   Or download an episode directly:
-   ```powershell
-   uvx --from git+https://github.com/Aditya-Dobhada/anikoto.git anikoto "https://anikoto.cz/watch/one-piece-odmau" -p "$HOME\Videos" -a sub --range 14-14
-   ```
-
----
-
-## CLI Installation
-
-### Recommended: Using `uv` / `uvx`
-
-Run directly without installing into global system Python:
-
-```bash
-uvx --from git+https://github.com/Aditya-Dobhada/anikoto.git anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14
-```
-
-Or install persistently as a global CLI tool:
+### Option 1: Install with `uv` (Fastest)
 
 ```bash
 uv tool install git+https://github.com/Aditya-Dobhada/anikoto.git
 ```
 
-### Using `pip`
+Run either the GUI or CLI:
+```bash
+anikoto --gui
+anikoto "https://anikoto.cz/watch/one-piece-odmau" -a sub --range 14-14
+```
+
+### Option 2: Install with `pip`
 
 ```bash
-python3 -m pip install git+https://github.com/Aditya-Dobhada/anikoto.git
+pip install git+https://github.com/Aditya-Dobhada/anikoto.git
 ```
 
 ---
 
-## CLI Reference
+## Command Line Usage
+
+Use the `anikoto` command to download episodes directly from the terminal.
+
+### Download a Single Episode (with Subtitles)
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14
+```
+
+### Download an Episode Range
+
+```bash
+anikoto "https://anikoto.cz/watch/solo-leveling-ilh08" -p ~/Anime -a sub --range 1-12
+```
+
+### Download Specific Episodes
+
+```bash
+anikoto "https://anikoto.cz/watch/frieren-beyond-journey-s-end-c6fbj" -p ~/Anime -a sub -e 1,3,7
+```
+
+### Download from a Specific Server (e.g. `vidstream-1`)
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14 --source vidstream-1
+```
+
+### List Episodes Without Downloading
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" --list
+```
+
+### Launch the Desktop GUI from Terminal
+
+```bash
+anikoto --gui
+```
+
+---
+
+## Command Line Options
 
 ```
 usage: anikoto [-h] [--gui] [--version] [--debug]
@@ -107,73 +92,42 @@ usage: anikoto [-h] [--gui] [--version] [--debug]
 
 | Flag | Short | Default | Description |
 |---|---|---|---|
-| `url` | | *Optional if `--gui`* | Series or episode URL (e.g. `https://anikoto.cz/watch/one-piece-odmau`) |
-| `--gui` | | `False` | Launch the graphical user interface |
+| `url` | | | Anime series or episode URL |
+| `--gui` | | `False` | Launch desktop graphical interface |
+| `--audio` | `-a` | `dub` | Audio version: `sub` (original + subtitles) or `dub` (English) |
+| `--range` | `-r` | | Episode range (e.g. `1-12`, or `14-14` for episode 14 only) |
+| `--episode` | `-e` | | Comma-separated episode list (e.g. `1,3,5`) |
+| `--source` | `-s` | All | Specific server (e.g. `vidstream-1`, `hd-1`, `vidstream-2`) |
 | `--quality` | `-q` | `1080` | Video resolution: `2160`, `1440`, `1080`, `720`, `480`, `360` |
-| `--audio` | `-a` | `dub` | Audio type: `sub` (original + subtitles) or `dub` (English) |
-| `--range` | `-r` | None | Range of episodes (e.g. `1-10`, or `14-14` for only episode 14) |
-| `--episode` | `-e` | None | Comma-separated list of episodes (e.g. `1,4,12`) |
-| `--source` | `-s` | All | Specific server channel (e.g. `vidstream-1`, `hd-1`, `vidstream-2`) |
-| `--subtitles` | `-ss` | `True` | Download subtitle track when available |
-| `--subtitle-lang` | `-sl` | `English` | Subtitle language name filter |
-| `--downloader` | `-d` | `yt-dlp` | Downloader engine: `yt-dlp`, `ffmpeg`, or `N_m3u8DL-RE` |
-| `--path` | `-p` | `./` | Save folder path |
-| `--list` | | `False` | Print available episodes and exit |
-| `--last` | | `False` | Download only the newest episode |
-| `--debug` | | `False` | Output detailed request & stream logging |
+| `--path` | `-p` | `./` | Destination directory |
+| `--subtitles` | `-ss` | `True` | Download subtitles when available |
+| `--subtitle-lang` | `-sl` | `English` | Filter subtitles by language name |
+| `--downloader` | `-d` | `yt-dlp` | Download engine: `yt-dlp`, `ffmpeg`, or `N_m3u8DL-RE` |
+| `--list` | | `False` | List all available episodes and exit |
+| `--last` | | `False` | Download only the latest episode |
+| `--debug` | | `False` | Print detailed logs |
 
 ---
 
-## Examples
+## Subtitles
 
-### Download Single Episode (Subbed)
+When downloading with `-a sub`, subtitle tracks are saved alongside the video file as `.vtt` with identical names:
 
-```bash
-anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14
+```
+One Piece E14 Luffy Back in Action! Miss Kaya's Desperate Resistance!.mp4
+One Piece E14 Luffy Back in Action! Miss Kaya's Desperate Resistance!.en.vtt
 ```
 
-### Download Episode Range
+Media players such as VLC, IINA, and MPV automatically load and display these subtitles.
+
+To merge subtitles into the `.mp4` file as a soft-subtitle track:
 
 ```bash
-anikoto "https://anikoto.cz/watch/solo-leveling-ilh08" -p ~/Anime -a sub --range 1-12
+ffmpeg -i "Episode.mp4" -i "Episode.en.vtt" -c copy -c:s mov_text "Episode-subbed.mp4"
 ```
-
-### Download from Specific Server (e.g. `vidstream-1`)
-
-```bash
-anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14 --source vidstream-1
-```
-
-### Download Specific Episodes
-
-```bash
-anikoto "https://anikoto.cz/watch/frieren-beyond-journey-s-end-c6fbj" -p ~/Anime -a sub -e 1,3,7
-```
-
-### List Episodes Without Downloading
-
-```bash
-anikoto "https://anikoto.cz/watch/one-piece-odmau" --list
-```
-
----
-
-## Subtitles & Player Notes
-
-When `-ss` is enabled (default), subtitles are saved as standard `.vtt` files directly alongside the `.mp4` video with matching file names.
-
-- **VLC, IINA, and MPV:** Automatically detect and show the `.vtt` subtitle file when playing the video.
-- **Soft-Sub Muxing:** To package the `.vtt` file directly inside the `.mp4` container as a selectable subtitle track:
-  ```bash
-  ffmpeg -i "Episode.mp4" -i "Episode.en.vtt" -c copy -c:s mov_text "Episode (Subbed).mp4"
-  ```
-- **Hardsub Burning:** To permanently render subtitles into the video frames:
-  ```bash
-  ffmpeg -i "Episode.mp4" -vf "subtitles='Episode.en.vtt'" -c:a copy "Episode (Hardsub).mp4"
-  ```
 
 ---
 
 ## License
 
-Distributed under the [MIT License](LICENSE).
+MIT

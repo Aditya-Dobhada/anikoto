@@ -14,12 +14,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.7'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -29,14 +29,16 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          pyinstaller --onefile --windowed --name Anikoto-GUI --icon icon.ico --collect-all customtkinter --collect-all language_data anikoto/gui.py
-          pyinstaller --onefile --name anikoto --icon icon.ico --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
+          pyinstaller --onefile --windowed --name Anikoto --icon icon.ico --paths . --collect-all customtkinter --collect-all language_data anikoto/gui.py
+          pyinstaller --onefile --name anikoto --icon icon.ico --paths . --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
+          copy dist\Anikoto.exe dist\Anikoto-GUI.exe
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: anikoto-windows
           path: |
+            dist/Anikoto.exe
             dist/Anikoto-GUI.exe
             dist/anikoto.exe
 
@@ -45,12 +47,12 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.7'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -60,7 +62,7 @@ jobs:
 
       - name: Build Linux binary with PyInstaller
         run: |
-          pyinstaller --onefile --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
+          pyinstaller --onefile --collect-all customtkinter --collect-all language_data --paths . anikoto/anikoto.py
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -70,15 +72,17 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    timeout-minutes: 8
+    continue-on-error: true
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13.7'
+          python-version: '3.12'
 
       - name: Install dependencies
         run: |
@@ -88,7 +92,7 @@ jobs:
 
       - name: Build macOS binary with PyInstaller
         run: |
-          pyinstaller --onefile --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
+          pyinstaller --onefile --collect-all customtkinter --collect-all language_data --paths . anikoto/anikoto.py
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -98,6 +102,7 @@ jobs:
 
   release:
     needs: [build-windows, build-linux, build-macos]
+    if: always() && needs.build-windows.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Download all artifacts
@@ -105,48 +110,49 @@ jobs:
         with:
           path: dist
 
-      - name: Prepare release assets (rename + zip)
+      - name: Prepare release packages
         run: |
           set -eux
+          mkdir -p dist/packages
 
-          # Windows: rename and zip
+          # Windows
           if [ -d dist/anikoto-windows ]; then
-            zip -j dist/anikoto-windows/anikoto-windows.zip dist/anikoto-windows/*.exe
-          else
-            echo "Warning: dist/anikoto-windows not found"
+            cd dist/anikoto-windows
+            zip -j ../packages/anikoto-windows.zip *.exe
+            cd ../..
           fi
 
-          # Linux: rename, ensure exec bit, and zip
-          if [ -f dist/anikoto-linux/anikoto ]; then
-            mv dist/anikoto-linux/anikoto dist/anikoto-linux/anikoto-linux
-            chmod +x dist/anikoto-linux/anikoto-linux
-            zip -j dist/anikoto-linux/anikoto-linux.zip dist/anikoto-linux/anikoto-linux
-          else
-            echo "Warning: dist/anikoto-linux/anikoto not found"
+          # Linux
+          if [ -d dist/anikoto-linux ]; then
+            cd dist/anikoto-linux
+            chmod +x * || true
+            zip -j ../packages/anikoto-linux.zip *
+            cd ../..
           fi
 
-          # macOS: rename, ensure exec bit, and zip
-          if [ -f dist/anikoto-macos/anikoto ]; then
-            mv dist/anikoto-macos/anikoto dist/anikoto-macos/anikoto-macos
-            chmod +x dist/anikoto-macos/anikoto-macos
-            zip -j dist/anikoto-macos/anikoto-macos.zip dist/anikoto-macos/anikoto-macos
-          else
-            echo "Warning: dist/anikoto-macos/anikoto not found"
+          # macOS
+          if [ -d dist/anikoto-macos ]; then
+            cd dist/anikoto-macos
+            chmod +x * || true
+            zip -j ../packages/anikoto-macos.zip *
+            cd ../..
           fi
 
-          # Show what we will upload
-          ls -lR dist
+          ls -la dist/packages
 
       - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: "Anikoto v1.0.${{ github.run_number }}"
+          make_latest: true
           body: |
-            Automated release build.
-          files: |
-            dist/anikoto-windows/anikoto-windows.zip
-            dist/anikoto-linux/anikoto-linux.zip
-            dist/anikoto-macos/anikoto-macos.zip
+            Automated release build of Anikoto.
+            
+            ### Windows (No Python Needed)
+            1. Download `anikoto-windows.zip` below.
+            2. Extract the zip file.
+            3. Double-click `Anikoto.exe`.
+          files: dist/packages/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

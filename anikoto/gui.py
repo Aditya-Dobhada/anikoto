@@ -13,15 +13,37 @@ from urllib.parse import urlparse
 import logging
 
 try:
-    import customtkinter as ctk
-    from tkinter import filedialog, messagebox
-    HAS_CUSTOMTKINTER = True
-except ImportError:
-    HAS_CUSTOMTKINTER = False
     import tkinter as tk
-    from tkinter import ttk, filedialog, messagebox
+    from tkinter import filedialog, messagebox
+    HAS_TKINTER = True
+except Exception:
+    tk = None
+    filedialog = None
+    messagebox = None
+    HAS_TKINTER = False
 
-from anikoto.anikoto import clean_name, configure_logging
+try:
+    if HAS_TKINTER:
+        import customtkinter as ctk
+        HAS_CUSTOMTKINTER = True
+    else:
+        ctk = None
+        HAS_CUSTOMTKINTER = False
+except Exception:
+    ctk = None
+    HAS_CUSTOMTKINTER = False
+
+try:
+    from anikoto.anikoto import clean_name, configure_logging
+except ImportError:
+    try:
+        from anikoto import clean_name, configure_logging
+    except ImportError:
+        import sys
+        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if _root not in sys.path:
+            sys.path.insert(0, _root)
+        from anikoto.anikoto import clean_name, configure_logging
 
 
 def get_default_save_dir():
@@ -72,13 +94,31 @@ class AnikotoGUI:
         self._start_log_listener()
 
     def _run_fallback_notice(self):
-        root = tk.Tk()
-        root.withdraw()
-        messagebox.showerror(
-            "Missing Dependencies",
-            "CustomTkinter is required to run the Anikoto GUI.\n\n"
-            "Install it using:\n  pip install customtkinter"
+        msg = (
+            "\n[!] Anikoto Desktop GUI could not start because CustomTkinter/Tkinter is missing.\n\n"
+            "Options:\n"
+            "  1. For Windows (Zero install, no Python needed):\n"
+            "     Download and run the standalone 'Anikoto.exe':\n"
+            "     https://github.com/Aditya-Dobhada/anikoto/releases/latest\n\n"
+            "  2. Install CustomTkinter for your Python environment:\n"
+            "     pip install customtkinter\n\n"
+            "  3. Use Anikoto via command line:\n"
+            "     anikoto <URL> [OPTIONS]\n"
         )
+        if HAS_TKINTER and tk and messagebox:
+            try:
+                root = tk.Tk()
+                root.withdraw()
+                messagebox.showerror(
+                    "Missing Dependencies",
+                    "CustomTkinter is required to run the Anikoto GUI.\n\n"
+                    "Install it using:\n  pip install customtkinter\n\n"
+                    "Or download the standalone Anikoto.exe from GitHub Releases."
+                )
+                root.destroy()
+            except Exception:
+                pass
+        sys.stderr.write(msg + "\n")
         sys.exit(1)
 
     def _build_ui(self):
@@ -579,13 +619,22 @@ class AnikotoGUI:
         import requests
         from bs4 import BeautifulSoup
         import re
-        from anikoto.anikoto import (
-            subtitles as download_subs,
-            download as run_download,
-            player_parameters,
-            decrypt_source,
-            signed_url
-        )
+        try:
+            from anikoto.anikoto import (
+                subtitles as download_subs,
+                download as run_download,
+                player_parameters,
+                decrypt_source,
+                signed_url
+            )
+        except ImportError:
+            from anikoto import (
+                subtitles as download_subs,
+                download as run_download,
+                player_parameters,
+                decrypt_source,
+                signed_url
+            )
 
         session = requests.Session()
         session.headers.update({
@@ -757,10 +806,14 @@ class AnikotoGUI:
                 self._log(f"Warning: Could not download E{num} from selected servers.")
 
     def run(self):
-        self.root.mainloop()
+        if hasattr(self, "root") and self.root:
+            self.root.mainloop()
 
 
 def run_gui():
+    if not HAS_CUSTOMTKINTER:
+        AnikotoGUI()._run_fallback_notice()
+        return
     app = AnikotoGUI()
     app.run()
 
