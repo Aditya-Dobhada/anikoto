@@ -1,101 +1,139 @@
 # 🌀 Anikoto Downloader
 
-> **Download anime from `anikoto.tv` / `anikoto.bz` / `anikoto.net` / `anikoto.cz`** 
+CLI tool to download anime from `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `anikoto.cz`.
 
-## Screenshot
+---
 
-![App Screenshot](https://i.imgur.com/VEYUMcn.png)
+## Features
 
+- **Multi-domain support:** Works across `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `anikoto.cz`.
+- **Quality options:** Select stream resolutions: `2160`, `1440`, `1080` (default), `720`, `480`, `360`.
+- **Audio selection:** Choose `sub` (original Japanese audio with subtitles) or `dub` (English dub).
+- **Flexible episode downloads:** Download single episodes, ranges (`--range 1-12`, `--range 14-14`), or comma-separated lists (`--episode 1,3,5`).
+- **Server selection:** Target generic sources (`megaplay`, `vidstream`, `kiwi`, `vidcloud`, `vidplay`, `hd`) or specific server numbers (`vidstream-1`, `vidstream-2`, `hd-1`).
+- **Subtitle downloads:** Automatic WebVTT subtitle detection and download (`-ss`) with language filtering (`-sl`).
+- **Downloader backends:** Supports `yt-dlp` (default), `ffmpeg`, and `N_m3u8DL-RE`.
 
-[![PyPI](https://img.shields.io/pypi/v/anikoto.svg)](https://pypi.org/project/anikoto)
-[![Python Version](https://img.shields.io/badge/python-3.8%2B-blue.svg)]()
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)]()
-
-## Discord 
-
-https://discord.gg/bb59Scbv3g
+---
 
 ## Installation
 
-Install from Pypie
+### Using `uv` / `uvx` (Recommended)
+
+Run directly without manual installation:
+
+```bash
+uvx anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14
+```
+
+Or install as a persistent CLI tool:
+
+```bash
+uv tool install anikoto
+```
+
+### Using `pip`
+
+Install from PyPI:
 
 ```bash
 python3 -m pip install anikoto
 ```
 
-Install from Github
+Install latest development version from GitHub:
 
 ```bash
-python3 -m pip install git+https://github.com/testingbetaversion/anikoto.git
+python3 -m pip install git+https://github.com/Aditya-Dobhada/anikoto.git
 ```
 
-## Usage/Examples
+---
 
-```bash
-anikoto https://anikoto.tv/watch/one-piece-odmau  -p /Users/Downloads  -a sub --range 1129-1129
+## CLI Reference
+
 ```
-```bash
-anikoto "https://anikoto.tv/watch/solo-leveling-ilh08/ep-1"
-```
-
-```bash
-anikoto "https://anikoto.tv/watch/frieren-beyond-journey-s-end-c6fbj/ep-1" -p /Users/Downloads
-```
-
-```bash
-anikoto "https://anikoto.tv/watch/bottom-tier-character-tomozaki-2nd-stage-0et8i" -p /Users/Downloads  
-```
-
-Default Audio is Dub 
-Subs for sub/dub will be downloaded by default
-
-## help
-
-```cmd
- $ anikoto --help
 usage: anikoto [-h] [--version] [--debug]
-                  [--quality {2160,1440,1080,720,480,360}] [--audio {sub,dub}]
-                  [--downloader {yt-dlp,N_m3u8DL-RE,ffmpeg}] [--subtitles]
-                  [--list] [--last] [--subtitle-lang LANG] [--path PATH]
-                  [--source SOURCE] [--episode EPISODE] [--range RANGE]
-                  url
-
-Anikoto (https://anikoto.tv/) Downloader
-
-positional arguments:
-  url                   Video Url like: https://anikoto.tv/watch/solo-
-                        leveling-ilh08/ep-1
-
-options:
-  -h, --help            show this help message and exit
-  --version, -v         show program's version number and exit
-  --debug               Enable debug mode
-  --quality, -q {2160,1440,1080,720,480,360}
-                        Choose a Quality
-  --audio, -a {sub,dub}
-                        Download Audio
-  --downloader, -d {yt-dlp,N_m3u8DL-RE,ffmpeg}
-                        Downloader
-  --subtitles, -ss      Download Subs
-  --list                List Episodes
-  --last                Only Download Last Episode
-  --subtitle-lang, -sl LANG
-                        Subtitle language to download (matches track label,
-                        e.g. English, Spanish, Arabic)
-  --path, -p PATH       path to save the file
-  --source, -s SOURCE   Comma-separated list of sources to download from
-                        ['megaplay', 'vidstream', 'kiwi', 'vidcloud',
-                        'vidplay']
-  --episode, -e EPISODE
-                        Comma-separated list of Episodes to download
-  --range, -r RANGE     Specify episode range (e.g. 1-5) if you want to
-                        download only episode 1129 use 1129-1129
-
-
+               [--quality {2160,1440,1080,720,480,360}] [--audio {sub,dub}]
+               [--downloader {yt-dlp,N_m3u8DL-RE,ffmpeg}] [--subtitles]
+               [--list] [--last] [--subtitle-lang LANG] [--path PATH]
+               [--source SOURCE] [--episode EPISODE] [--range RANGE]
+               url
 ```
 
+| Flag | Short | Default | Description |
+|---|---|---|---|
+| `url` | | *Required* | Episode or series URL (e.g. `https://anikoto.cz/watch/one-piece-odmau`) |
+| `--quality` | `-q` | `1080` | Video resolution: `2160`, `1440`, `1080`, `720`, `480`, `360` |
+| `--audio` | `-a` | `dub` | Audio type: `sub` or `dub` |
+| `--range` | `-r` | None | Range of episodes to download (e.g. `1-10`, or `14-14` for a single episode) |
+| `--episode` | `-e` | None | Comma-separated list of episode numbers (e.g. `1,4,12`) |
+| `--last` | | `False` | Download only the latest episode |
+| `--list` | | `False` | List available episodes and exit |
+| `--source` | `-s` | All | Specific server or comma-separated servers (e.g. `vidstream-1`, `hd-1`, `megaplay`) |
+| `--subtitles` | `-ss` | `True` | Download subtitles when available |
+| `--subtitle-lang` | `-sl` | `English` | Subtitle language name filter |
+| `--downloader` | `-d` | `yt-dlp` | Download backend: `yt-dlp`, `ffmpeg`, or `N_m3u8DL-RE` |
+| `--path` | `-p` | `./` | Directory where downloaded episodes are saved |
+| `--debug` | | `False` | Print verbose debug information |
+| `--version` | `-v` | | Show program version |
 
+---
 
-## ❤️ Thanks
+## Examples
 
-This project was made with love. If it has helped you, a ⭐ on GitHub would be greatly appreciated.
+### Download a specific episode (Subtitled)
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14
+```
+
+### Download an episode range
+
+```bash
+anikoto "https://anikoto.cz/watch/solo-leveling-ilh08" -p ~/Anime -a sub --range 1-5
+```
+
+### Download specific server (e.g. `vidstream-1` or `hd-1`)
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" -p ~/Movies -a sub --range 14-14 --source vidstream-1
+```
+
+### Download specific episode numbers
+
+```bash
+anikoto "https://anikoto.cz/watch/frieren-beyond-journey-s-end-c6fbj" -p ~/Anime -a sub -e 1,3,7
+```
+
+### List available episodes without downloading
+
+```bash
+anikoto "https://anikoto.cz/watch/one-piece-odmau" --list
+```
+
+---
+
+## Subtitles
+
+When `-ss` is enabled (default), subtitles are saved as standard `.vtt` files alongside the `.mp4` video with matching basenames. Most media players (VLC, IINA, MPV) automatically load these subtitles on playback.
+
+### Mux Subtitles into a Single File
+
+To embed the `.vtt` subtitle into the video container as a selectable soft-subtitle track:
+
+```bash
+ffmpeg -i "Episode.mp4" -i "Episode.en.vtt" -c copy -c:s mov_text "Episode (Subbed).mp4"
+```
+
+### Burn Subtitles In (Hardsub)
+
+To permanently burn the subtitles directly into the video frames:
+
+```bash
+ffmpeg -i "Episode.mp4" -vf "subtitles='Episode.en.vtt'" -c:a copy "Episode (Hardsub).mp4"
+```
+
+---
+
+## License
+
+Distributed under the [MIT License](LICENSE).

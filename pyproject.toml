@@ -13,15 +13,15 @@ classifiers = [
 ]
 
 dependencies = [
-       'requests',
-        'yt-dlp',
-        'pycryptodome',
-        'bs4',
-        'curl_cffi',
-        'm3u8',
-        'cryptography',
-        'langcodes'
-
+    'requests',
+    'yt-dlp',
+    'pycryptodome',
+    'bs4',
+    'curl_cffi',
+    'm3u8',
+    'cryptography',
+    'langcodes',
+    'language-data'
 ]
 
 [project.scripts]

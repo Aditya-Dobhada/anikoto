@@ -448,15 +448,18 @@ def subtitles(response, session, args, anime, number, title):
         for track in response['tracks']:
             try:
                 logging.info(f"Track Found: {track.get('label')} ({track.get('kind')})")
-                if args.subtitle_lang.lower() in track.get('label').lower():
-                    logging.info(f"Track: {track.get('label')} ({track.get('kind')})")
+                track_label = track.get('label')
+                if track_label and args.subtitle_lang.lower() in track_label.lower():
+                    logging.info(f"Track: {track_label} ({track.get('kind')})")
                     if track.get('file'):
                         logging.info(f"Track URL: {track.get('file')}")
-                        label = track["label"]
-                        language_name = label.split()[0]
-                        code = Language.find(language_name).language
+                        language_name = track_label.split()[0]
+                        try:
+                            code = Language.find(language_name).language
+                        except Exception:
+                            code = language_name.lower()[:2]
                         if not os.path.exists(f"{args.path}/{anime}/{anime} E{number} {title}.{code}.vtt"):
-                            logging.info(f"Downloading subtitles for E{number} {title} {track.get('label')}")
+                            logging.info(f"Downloading subtitles for E{number} {title} {track_label}")
                             s_r = session.get(track.get('file'),headers={
                                 "referer": "https://megaplay.buzz/",
                             })
@@ -476,12 +479,7 @@ def main():
     services_availble = ['megaplay', 'vidstream', 'kiwi', 'vidcloud', 'vidplay', 'hd']
     
     def source_type(value):    
-        sources = value.split(",") if ',' in value else [value]
-        invalid = set(sources) - set(services_availble)
-        if invalid:
-            raise argparse.ArgumentTypeError(
-                f"Invalid source(s): {', '.join(invalid)}"
-            )
+        sources = [s.strip().lower() for s in (value.split(",") if ',' in value else [value])]
         return sources
     
     def episode_type(value):
@@ -553,16 +551,14 @@ def main():
         i+=1
     del i
 
-    for number, data in enumerate(episode_data, start=1):
-        print(f"{number}: {data['title']}")
-        if args.debug:
+
+    if args.debug:
+        for number, data in enumerate(episode_data, start=1):
             title = data['title']
+            print(f"{number}: {title}")
             print(f"Data IDs: {data['data-ids']}")
-            data_ids = data['data-ids']
-            data_mel = data['data-mel']
-            print(f"Data MAL: {data_mal}")
-            data_timestamp = data['data-timestamp']
-            print(f"Data Timestamp: {data['data-timestamp']}")
+            print(f"Data MAL: {data.get('data-mel')}")
+            print(f"Data Timestamp: {data.get('data-timestamp')}")
             print()
 
 
@@ -584,6 +580,7 @@ def main():
             print(f"{number}: {data['title']}")
              
       
+
 
     if args.list:
         logging.info("List of Episodes:")
@@ -637,10 +634,10 @@ def main():
                             print(f"Skipping {data['type']} for E{number} {title} as it does not match the requested audio type {args.audio}")
                         continue
                 if args.source:
-                    source = data['li'].lower()
-                    if '-' in source:
-                        source = source.split('-')[0].strip()
-                    if source not in args.source:
+                    full_source = data['li'].lower().strip()
+                    base_source = full_source.split('-')[0].strip() if '-' in full_source else full_source
+                    user_sources = [s.lower().strip() for s in args.source]
+                    if full_source not in user_sources and base_source not in user_sources:
                         if args.debug:
                             print(f"Skipping {data['li']} for E{number} {title} as it is not in the requested sources {args.source}")
                         continue
@@ -676,12 +673,19 @@ def main():
                     if args.debug:
                         print(format_exc())
 
-                if 'hd' in args.source or 'vidstream' in args.source:
+                if any(x in ' '.join(args.source) for x in ['hd', 'vidstream', 'megaplay']):
                     id_ = re.search(r' data-id=\"(\d+)\"', main_r.text)
                     if id_:
                         id_ = id_.group(1)
 
-                        r = session.get("https://megaplay.buzz/stream/getSourcesNew", params={"id":id_, 'id':id_})
+                        if '/videojs/' in url:
+                            sources_endpoint = "https://megaplay.buzz/videojs/stream/getSourcesNew"
+                        else:
+                            sources_endpoint = "https://megaplay.buzz/stream/getSourcesNew"
+                        r = session.get(sources_endpoint, params={"id":id_, 'id':id_}, headers={
+                            "referer": url,
+                            "x-requested-with": "XMLHttpRequest"
+                        })
                         if args.debug:
                             print(r.text, file=sys.stderr)
 

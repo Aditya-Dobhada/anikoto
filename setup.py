@@ -12,9 +12,8 @@ setup(
         'm3u8',
         'pycryptodome',
         'cryptography',
-        'langcodes'
-
-
+        'langcodes',
+        'language-data'
     ],
     entry_points={
         'console_scripts': [
