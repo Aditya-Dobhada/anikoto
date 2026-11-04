@@ -497,9 +497,10 @@ def main():
         "x-requested-with": "XMLHttpRequest",
     })
     parser = argparse.ArgumentParser(description="Anikoto (https://anikoto.tv/) Downloader", epilog="Example usage:\n python3 anikoto.py OPTIONS URL")
+    parser.add_argument("--gui", action="store_true", help="Launch graphical user interface")
     parser.add_argument("--version","-v", action="version", version=f"%(prog)s {version}")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
-    parser.add_argument("url", help="Video Url like: https://anikoto.tv/watch/solo-leveling-ilh08/ep-1")
+    parser.add_argument("url", nargs="?", default=None, help="Video Url like: https://anikoto.tv/watch/solo-leveling-ilh08/ep-1")
     parser.add_argument("--quality","-q", choices=['2160','1440',"1080", "720", "480",'360'],default="1080", help="Choose a Quality")
     parser.add_argument("--audio", "-a", choices=['sub', 'dub'], default='dub', help="Download Audio")
     parser.add_argument("--downloader", "-d", choices=['yt-dlp', 'N_m3u8DL-RE', 'ffmpeg'], default='yt-dlp', help="Downloader")
@@ -515,6 +516,18 @@ def main():
 
 
     args = parser.parse_args()
+    if args.gui or not args.url:
+        try:
+            from anikoto.gui import run_gui
+            run_gui()
+            return
+        except Exception as e:
+            if args.gui:
+                logging.error(f"Failed to launch GUI: {e}")
+                sys.exit(1)
+            parser.print_help()
+            sys.exit(1)
+
     if args.debug:
         logging.info("Selected Args"+str(args))
     r = session.get(args.url)

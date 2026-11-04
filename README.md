@@ -6,6 +6,7 @@ CLI tool to download anime from `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `
 
 ## Features
 
+- **Graphical User Interface (GUI):** Clean, modern desktop window for non-technical users (paste URL, pick options, click download).
 - **Multi-domain support:** Works across `anikoto.tv`, `anikoto.bz`, `anikoto.net`, and `anikoto.cz`.
 - **Quality options:** Select stream resolutions: `2160`, `1440`, `1080` (default), `720`, `480`, `360`.
 - **Audio selection:** Choose `sub` (original Japanese audio with subtitles) or `dub` (English dub).
@@ -45,6 +46,22 @@ Install latest development version from GitHub:
 ```bash
 python3 -m pip install git+https://github.com/Aditya-Dobhada/anikoto.git
 ```
+
+---
+
+## Desktop Graphical Interface (GUI)
+
+Anikoto includes a desktop app designed for non-technical users on Windows, macOS, and Linux:
+
+- **Windows Executable (Zero Install):** Download `anikoto-windows.zip` from [Releases](https://github.com/Aditya-Dobhada/anikoto/releases), extract, and double-click `Anikoto-GUI.exe`.
+- **Using `uvx`:**
+  ```bash
+  uvx --from git+https://github.com/Aditya-Dobhada/anikoto.git anikoto-gui
+  ```
+- **From Terminal:** Run `anikoto` without arguments or pass `--gui`:
+  ```bash
+  anikoto --gui
+  ```
 
 ---
 

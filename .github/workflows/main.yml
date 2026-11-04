@@ -29,13 +29,16 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          pyinstaller --onefile --icon icon.ico anikoto/anikoto.py
+          pyinstaller --onefile --windowed --name Anikoto-GUI --icon icon.ico --collect-all customtkinter --collect-all language_data anikoto/gui.py
+          pyinstaller --onefile --name anikoto --icon icon.ico --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
           name: anikoto-windows
-          path: dist/anikoto.exe
+          path: |
+            dist/Anikoto-GUI.exe
+            dist/anikoto.exe
 
   build-linux:
     runs-on: ubuntu-latest
@@ -57,7 +60,7 @@ jobs:
 
       - name: Build Linux binary with PyInstaller
         run: |
-          pyinstaller --onefile anikoto/anikoto.py
+          pyinstaller --onefile --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
 
       - name: Upload Linux artifact
         uses: actions/upload-artifact@v4
@@ -85,7 +88,7 @@ jobs:
 
       - name: Build macOS binary with PyInstaller
         run: |
-          pyinstaller --onefile anikoto/anikoto.py
+          pyinstaller --onefile --collect-all customtkinter --collect-all language_data anikoto/anikoto.py
 
       - name: Upload macOS artifact
         uses: actions/upload-artifact@v4
@@ -107,11 +110,10 @@ jobs:
           set -eux
 
           # Windows: rename and zip
-          if [ -f dist/anikoto-windows/anikoto.exe ]; then
-            mv dist/anikoto-windows/anikoto.exe dist/anikoto-windows/anikoto-windows.exe
-            zip -j dist/anikoto-windows/anikoto-windows.zip dist/anikoto-windows/anikoto-windows.exe
+          if [ -d dist/anikoto-windows ]; then
+            zip -j dist/anikoto-windows/anikoto-windows.zip dist/anikoto-windows/*.exe
           else
-            echo "Warning: dist/anikoto-windows/anikoto.exe not found"
+            echo "Warning: dist/anikoto-windows not found"
           fi
 
           # Linux: rename, ensure exec bit, and zip

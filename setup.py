@@ -13,11 +13,14 @@ setup(
         'pycryptodome',
         'cryptography',
         'langcodes',
-        'language-data'
+        'language-data',
+        'customtkinter>=6.0.0',
+        'darkdetect'
     ],
     entry_points={
         'console_scripts': [
             'anikoto=anikoto.anikoto:main',
+            'anikoto-gui=anikoto.gui:run_gui',
         ],
     },
     author='testingbetaversion',

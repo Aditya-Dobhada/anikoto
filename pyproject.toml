@@ -21,11 +21,14 @@ dependencies = [
     'm3u8',
     'cryptography',
     'langcodes',
-    'language-data'
+    'language-data',
+    'customtkinter>=6.0.0',
+    'darkdetect'
 ]
 
 [project.scripts]
 anikoto = "anikoto.anikoto:main"
+anikoto-gui = "anikoto.gui:run_gui"
 
 [project.urls]
 "Homepage" = "https://github.com/testingbetaversion/anikoto"

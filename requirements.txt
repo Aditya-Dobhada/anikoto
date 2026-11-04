@@ -3,6 +3,10 @@ requests
 yt-dlp
 langcodes
 langcodes[data]
+language-data
 curl_cffi
 cryptography
 m3u8
+customtkinter
+darkdetect
+packaging
